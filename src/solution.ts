@@ -74,8 +74,9 @@ export const calculateDevliveryFee = (
   if (distance <= 1000) {
     distanceFee = 2;
   } else {
-    const quotient = Math.floor(distance / 500); // => 4 => the times 3 fits into 13
-    const remainder = distance % 500;
+    const distanceAfterFirstKm = distance - 1000;
+    const quotient = Math.floor((distanceAfterFirstKm - 1000) / 500); // => 4 => the times 3 fits into 13
+    const remainder = distanceAfterFirstKm % 500;
 
     // If the delivery distance is 1501 meters, the delivery fee is: 2€ base fee + 1€ for the first 500 m + 1€ for the second 500 m => 4€
     distanceFee = 2 + quotient * 1 + (remainder > 0 ? 1 : 0);
