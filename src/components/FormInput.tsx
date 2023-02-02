@@ -1,35 +1,57 @@
 import { useState } from "react";
 import "./formInput.css";
 
-const getCurrentTimeInFormat = () => {
-  const now = new Date();
+declare module "react" {
+  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+    focused?: string;
+  }
+}
 
-  return now.toISOString().slice(0, 11) + now.toLocaleTimeString().slice(0, 5);
+type FormInputType = {
+  label: string;
+  errorMessage: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  id: number;
+  name: string;
+  min: string;
+  value: string;
+  type: string;
 };
-const FormInput = (props: any) => {
+
+const FormInput = (props: FormInputType) => {
   const [focused, setFocused] = useState(false);
-  const { label, errorMessage, onChange, id, name, ...inputProps } = props;
+  const { label, type, min, errorMessage, onChange, id, name, ...inputProps } =
+    props;
 
   const handleFocus = (e: React.FormEvent<HTMLInputElement>) => {
     setFocused(true);
   };
 
-  const minTime = getCurrentTimeInFormat();
-
   return (
     <div className="formInput">
       <label>{label}</label>
-      <input
-        name={name}
-        {...inputProps}
-        onChange={onChange}
-        onBlur={handleFocus}
-        onFocus={() =>
-          inputProps.name === "confirmPassword" && setFocused(true)
-        }
-        focused={focused.toString()}
-        min={label === "Time Delivery" && minTime}
-      />
+      {type === "datetime-local" ? (
+        <input
+          name={name}
+          type={type}
+          {...inputProps}
+          onChange={onChange}
+          onBlur={handleFocus}
+          onFocus={() => name === "confirmPassword" && setFocused(true)}
+          focused={focused.toString()}
+          min={min}
+        />
+      ) : (
+        <input
+          name={name}
+          type={type}
+          {...inputProps}
+          onChange={onChange}
+          onBlur={handleFocus}
+          onFocus={() => name === "confirmPassword" && setFocused(true)}
+          focused={focused.toString()}
+        />
+      )}
       <span>{errorMessage}</span>
     </div>
   );

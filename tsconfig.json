@@ -25,6 +25,8 @@
   },
   "include": [
     "src",
-    "**/*.ts"
+    "**/*.ts",
+    "cypress/component/App.cy.tsx",
+    "cypress/component/solution.cy.tsx"
   ]
 }

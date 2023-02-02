@@ -40,17 +40,38 @@ const isFridayRush = (deliveryTime: string) => {
   return false;
 };
 
+export const calcSurchargeByCartValue = (cartValue: number) => {
+  return cartValue < 10 ? 10 - cartValue : 0;
+};
+
+export const calcSurchargeByNumberOfItems = (numOfItem: number) => {
+  return numOfItem > 4 ? (numOfItem - 4) * 0.5 + (numOfItem > 12 ? 1.2 : 0) : 0;
+};
+
+export const calculateDistanceFee = (distance: number) => {
+  let distanceFee = 0.0;
+
+  // A delivery fee for the first 1000 meters (=1km) is 2€
+  if (distance <= 1000) {
+    distanceFee = 2;
+  } else {
+    const distanceAfterFirstKm = distance - 1000;
+    const quotient = Math.floor(distanceAfterFirstKm / 500);
+    const remainder = distanceAfterFirstKm % 500;
+
+    // If the delivery distance is 1501 meters, the delivery fee is: 2€ base fee + 1€ for the first 500 m + 1€ for the second 500 m => 4€
+    distanceFee = 2 + quotient * 1 + (remainder > 0 ? 1 : 0);
+  }
+
+  return distanceFee;
+};
+
 export const calculateDevliveryFee = (
   totalCurrCart: number,
   numberOfItem: number,
   distance: number,
   deliveryTime: any
 ) => {
-  let deliveryFee = 0;
-  let surcharge = 0;
-
-  let distanceFee = 0.0;
-
   // The delivery is free (0€) when the cart value is equal or more than 100€.
   if (totalCurrCart >= 100) {
     return {
@@ -59,30 +80,13 @@ export const calculateDevliveryFee = (
       value: "0",
     };
   }
+  let deliveryFee = 0;
+  let surchargeByCartValue = calcSurchargeByCartValue(totalCurrCart);
+  let surchargeByNumberOfItem = calcSurchargeByNumberOfItems(numberOfItem);
 
-  // If the cart value is less than 10€, the surcharge is the difference between the cart value and 10€.
-  if (totalCurrCart < 10) {
-    surcharge = 10 - totalCurrCart;
-  }
+  let distanceFee = calculateDistanceFee(distance);
 
-  // If the number of items is five or more, an additional 50 cent surcharge is added for each item above and including the fifth item.
-  // An extra "bulk" fee applies for more than 12 items of 1,20€
-  if (numberOfItem > 4) {
-    surcharge = (numberOfItem - 4) * 0.5 + (numberOfItem > 12 ? 1.2 : 0);
-  }
-  // A delivery fee for the first 1000 meters (=1km) is 2€
-  if (distance <= 1000) {
-    distanceFee = 2;
-  } else {
-    const distanceAfterFirstKm = distance - 1000;
-    const quotient = Math.floor((distanceAfterFirstKm - 1000) / 500); // => 4 => the times 3 fits into 13
-    const remainder = distanceAfterFirstKm % 500;
-
-    // If the delivery distance is 1501 meters, the delivery fee is: 2€ base fee + 1€ for the first 500 m + 1€ for the second 500 m => 4€
-    distanceFee = 2 + quotient * 1 + (remainder > 0 ? 1 : 0);
-  }
-
-  deliveryFee = surcharge + distanceFee;
+  deliveryFee = surchargeByCartValue + surchargeByNumberOfItem + distanceFee;
 
   const isBusyTime = isFridayRush(deliveryTime);
 

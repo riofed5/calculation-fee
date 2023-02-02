@@ -2,15 +2,21 @@ import { useState } from "react";
 import FormInput from "./components/FormInput";
 import { calculateDevliveryFee } from "./solution";
 
+const getCurrentTimeInFormat = () => {
+  const now = new Date();
+
+  return now.toISOString().slice(0, 11) + now.toLocaleTimeString().slice(0, 5);
+};
+
 export const inputsForm = [
   {
     id: 1,
     name: "cartValue",
     type: "text",
     placeholder: "Ex: 20.35",
-    errorMessage: "Cart Value accepts float number value",
+    errorMessage: "Cart Value accepts positive float number value",
     label: "Cart Value",
-    pattern: "^(([0-9]*)|(([0-9]*).([0-9]*)))$",
+    pattern: "^[+]?[0-9]{0,900}(?:\\.[0-9]{0,900})?$",
     required: true,
   },
   {
@@ -19,7 +25,7 @@ export const inputsForm = [
     type: "text",
     placeholder: "Ex: 2000",
     errorMessage:
-      "Delivery Distance accepts integer number value. Don't start with zero",
+      "Delivery Distance accepts positive number value. Don't start with zero",
     label: "Delivery Distance in (m)",
     pattern: "^([1-9][0-9]*)$",
     required: true,
@@ -30,7 +36,7 @@ export const inputsForm = [
     type: "text",
     placeholder: "Ex: 5",
     errorMessage:
-      "Amount Item accepts integer number value. Don't start with zero",
+      "Amount Item accepts positive number value. Don't start with zero",
     label: "Amount Item",
     pattern: "^([1-9][0-9]*)$",
     required: true,
@@ -43,7 +49,7 @@ export const inputsForm = [
     label: "Time Delivery",
     errorMessage: "Time Delivery can not be in the past",
     required: true,
-    min: `${new Date().toISOString()}`,
+    min: getCurrentTimeInFormat() as string,
   },
 ];
 
@@ -85,6 +91,7 @@ function App() {
         <h1>Delivery Fee Calculator</h1>
         {inputsForm.map((input) => (
           <FormInput
+            min={input.min ?? ""}
             key={input.id}
             {...input}
             value={(values as any)[input.name]}
